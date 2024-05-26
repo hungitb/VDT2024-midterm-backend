@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --detectOpenHandles",
-    "dev": "nodemon ./src/index.js",
-    "start": "node ./src/index.js"
+    "dev": "node ./database/init-data.js && nodemon ./src/index.js",
+    "start": "node ./database/init-data.js && node ./src/index.js"
   },
   "author": "",
   "license": "ISC",
