@@ -16,6 +16,12 @@ app.get('/api/student', getStudent)
 const postStudent = require('./controller/postStudent')
 app.post('/api/student', postStudent)
 
+const putStudent = require('./controller/putStudent')
+app.put('/api/student', putStudent)
+
+const deleteStudent = require('./controller/deleteStudent')
+app.delete('/api/student', deleteStudent)
+
 const server = app.listen(port)
 app.closeAllConnections = function () {
     server.close()
