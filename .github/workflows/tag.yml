@@ -32,12 +32,13 @@ jobs:
       - name: Clone config repo
         uses: actions/checkout@v3
         with:
-          repository: hungitb/test-be-config
+          repository: hungitb/VDT2024-backend-config
           ref: 'main'
           token:  ${{ secrets.ACTIONS_GITHUB_TOKEN }}
 
       - name: Update and push to config repo
         run: |
+          # Thay đoạn "image: hungitb/be*" ==> "image: hungitb/be:${tag}"
           sed -i 's/image: hungitb\/be.*/image: hungitb\/be:${{ steps.tag.outputs.tag }}/' values.yaml
           git config user.name "hungitb" && git config user.email "hungnv.itb@gmail.com"
           git add . && git commit -m update && git push origin main
