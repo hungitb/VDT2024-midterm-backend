@@ -7,7 +7,8 @@ const sequelize = new Sequelize(
     MYSQL_DATABASE_NAME, MYSQL_USER, MYSQL_PASSWORD, {
         host: MYSQL_HOST,
         port: MYSQL_PORT,
-        dialect: 'mysql'
+        dialect: 'mysql',
+        logging: false
     }
 )
 

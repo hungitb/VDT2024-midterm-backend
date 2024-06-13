@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: haproxy-sidecar-config-file
+data:
+  haproxy.cfg: |
+    defaults
+      mode http
+      timeout client 10s
+      timeout connect 5s
+      timeout server 10s 
+      timeout http-request 10s
+    frontend https-in
+      bind *:22222 ssl crt /usr/local/etc/haproxy-cert/ssl.crt
+      default_backend localhost-backend
+    frontend http-in
+      bind *:11111
+      default_backend localhost-backend
+    backend localhost-backend
+      mode http
+      server localhost localhost:44444
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels: {{ .Values.backend.service.selectorLabels | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ .Values.backend.service.selectorLabels | nindent 8 }}
+    spec:
+      containers:
+      - name: be-server
+        image: {{ .Values.backend.image }}
+        env:
+        - name: PORT
+          value: "44444" # Port này chỉ dùng để haproxy-sidecar chọc vào qua localhost
+        - name: MYSQL_HOST
+          value: {{ .Values.database.service.name }}
+        - name: MYSQL_USER
+          value: {{ .Values.database.user }}
+        - name: MYSQL_PORT
+          value: "{{ .Values.database.service.port }}"
+        - name: MYSQL_PASSWORD
+          value: {{ .Values.database.password }}
+        - name: MYSQL_DATABASE_NAME
+          value: {{ .Values.database.name }}
+      - name: haproxy-sidecar
+        image: haproxy:2.4.9
+        ports:
+        - containerPort: 11111 # http
+        - containerPort: 22222 # https
+        volumeMounts:
+        - name: haproxy-sidecar-config-file-mount-volumn
+          mountPath: /usr/local/etc/haproxy
+        - name: haproxy-sidecar-secret-mount-volumn
+          mountPath: /usr/local/etc/haproxy-cert
+          readOnly: true
+      volumes:
+      - name: haproxy-sidecar-secret-mount-volumn
+        secret: # Trước khi install chart thì cần phải tạo ra Secret này rồi, có 2 key là ssl.crt, ssl.key
+          secretName: haproxy-sidecar-secret
+          items:
+          - key: ssl.crt
+            path: ssl.crt
+          - key: ssl.crt.key
+            path: ssl.crt.key
+      - name: haproxy-sidecar-config-file-mount-volumn
+        configMap:
+          name: haproxy-sidecar-config-file

@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+spec:
+  selector:
+    matchLabels: {{ .Values.database.service.selectorLabels | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ .Values.database.service.selectorLabels | nindent 8 }}
+    spec:
+      containers:
+      - name: mysql
+        image: {{ .Values.database.image }}
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: {{ .Values.database.password }}

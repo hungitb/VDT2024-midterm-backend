@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  labels: {{ .Values.backend.service.selectorLabels | nindent 4 }}
+spec:
+  type: NodePort
+  selector: {{ .Values.backend.service.selectorLabels | nindent 4 }}
+  ports:
+  - name: backend-service-port-https
+    protocol: TCP
+    port: 22222
+    nodePort: {{ .Values.backend.service.nodePort }}
+  - name: backend-service-port-http
+    protocol: TCP
+    port: 11111
